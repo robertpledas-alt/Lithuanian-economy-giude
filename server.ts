@@ -79,6 +79,24 @@ async function startServer() {
         { source: "BustoRadar / CityNow", metric: "Demand Heatmap", value: "High", trend: "stable", info: "Listing-to-Sale ratio remains narrow in Naujamiestis." },
         { source: "OSP (State Data)", metric: "HPI Index", value: "+6.4%", trend: "up", info: "Annual house price index growth." }
       ],
+      housingChart: [
+        { month: "2023-01", hpi: 180, transactions: 1800 },
+        { month: "2023-06", hpi: 185, transactions: 2100 },
+        { month: "2023-12", hpi: 192, transactions: 1950 },
+        { month: "2024-01", hpi: 194, transactions: 1700 },
+        { month: "2024-06", hpi: 202, transactions: 2300 },
+        { month: "2024-12", hpi: 208, transactions: 2100 },
+        { month: "2025-03", hpi: 212, transactions: 2450 },
+      ],
+      laborChart: [
+        { month: "2023-01", unemployment: 7.2, earnings: 1800 },
+        { month: "2023-06", unemployment: 6.8, earnings: 1950 },
+        { month: "2023-12", unemployment: 7.0, earnings: 2010 },
+        { month: "2024-01", unemployment: 7.1, earnings: 2050 },
+        { month: "2024-06", unemployment: 6.5, earnings: 2180 },
+        { month: "2024-12", unemployment: 6.7, earnings: 2250 },
+        { month: "2025-03", unemployment: 6.9, earnings: 2320 },
+      ],
       governance: [
         { act: "National Defense Funding Act", status: "Passed", impact: "Increased military budget to 3.5% of GDP." },
         { act: "Tax Reform Package 2025", status: "Draft", impact: "Aiming to simplify VAT for small enterprises." },

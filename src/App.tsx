@@ -72,6 +72,7 @@ export default function App() {
             >
               <InflationChart 
                 data={data} 
+                pulseData={pulse}
                 selectedYear={selectedYear} 
                 setSelectedYear={setSelectedYear} 
               />

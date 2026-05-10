@@ -31,29 +31,63 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export const InflationChart = ({ 
   data, 
+  pulseData,
   selectedYear, 
   setSelectedYear 
 }: { 
   data: any[], 
+  pulseData: any,
   selectedYear: string,
   setSelectedYear: (year: string) => void
 }) => {
+  const [chartMode, setChartMode] = React.useState<'inflation' | 'housing' | 'labor'>('inflation');
   const [chartType, setChartType] = React.useState<'line' | 'bar'>('line');
   const years = ['All', '2021', '2022', '2023', '2024', '2025'];
 
-  const filteredData = selectedYear === 'All' 
-    ? data 
-    : data.filter(d => d.month.startsWith(selectedYear));
+  const getFilteredData = () => {
+    let source = data;
+    if (chartMode === 'housing') source = pulseData?.housingChart || [];
+    if (chartMode === 'labor') source = pulseData?.laborChart || [];
+
+    return selectedYear === 'All' 
+      ? source 
+      : source.filter((d: any) => d.month.startsWith(selectedYear));
+  };
+
+  const filteredData = getFilteredData();
+
+  const chartConfig = {
+    inflation: { color: '#BF3131', label: 'Annual Inflation %', key: 'value' },
+    housing: { color: '#006847', label: 'House Price Index (HPI)', key: 'hpi' },
+    labor: { color: '#EBC515', label: 'Gross Earnings (€)', key: 'earnings' }
+  }[chartMode];
 
   return (
     <div className="w-full h-[600px] bg-white border-2 border-[#1A1A1A] p-0 relative overflow-hidden flex flex-col">
       <div className="p-8 border-b border-[#D1D1D1] bg-[#F9F7F2]/50 flex justify-between items-start">
-        <div>
-          <h3 className="text-[#1A1A1A] font-editorial-serif font-black text-3xl tracking-tighter mb-1">
-            Harmonised Index <span className="italic">of</span> Consumer Prices
-          </h3>
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4">
+            <button 
+              onClick={() => setChartMode('inflation')}
+              className={`text-xl font-editorial-serif font-black tracking-tighter transition-all ${chartMode === 'inflation' ? 'text-[#1A1A1A] underline decoration-[#BF3131] decoration-4 underline-offset-8' : 'text-[#999] hover:text-[#1A1A1A]'}`}
+            >
+              Inflation
+            </button>
+            <button 
+              onClick={() => setChartMode('housing')}
+              className={`text-xl font-editorial-serif font-black tracking-tighter transition-all ${chartMode === 'housing' ? 'text-[#1A1A1A] underline decoration-[#006847] decoration-4 underline-offset-8' : 'text-[#999] hover:text-[#1A1A1A]'}`}
+            >
+              Housing
+            </button>
+            <button 
+              onClick={() => setChartMode('labor')}
+              className={`text-xl font-editorial-serif font-black tracking-tighter transition-all ${chartMode === 'labor' ? 'text-[#1A1A1A] underline decoration-[#EBC515] decoration-4 underline-offset-8' : 'text-[#999] hover:text-[#1A1A1A]'}`}
+            >
+              Labor
+            </button>
+          </div>
           <p className="text-[#666] text-[10px] font-sans font-black uppercase tracking-[0.2em]">
-            Annual Growth Rate (HICP % Change) // {selectedYear === 'All' ? 'Full Cycle' : `Internal Audit: ${selectedYear}`}
+            {chartConfig.label} // {selectedYear === 'All' ? 'Full Cycle' : `Internal Audit: ${selectedYear}`}
           </p>
         </div>
         
@@ -96,7 +130,7 @@ export const InflationChart = ({
           <AnimatePresence mode="wait">
             {chartType === 'line' ? (
               <motion.div
-                key="line-container"
+                key={`${chartMode}-line`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -108,8 +142,8 @@ export const InflationChart = ({
                 >
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#BF3131" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#BF3131" stopOpacity={0}/>
+                      <stop offset="5%" stopColor={chartConfig.color} stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor={chartConfig.color} stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="0" vertical={true} stroke="#E0E0E0" />
@@ -125,14 +159,14 @@ export const InflationChart = ({
                     tickLine={{ stroke: '#1A1A1A' }} 
                     tick={{ fill: '#1A1A1A', fontSize: 10, fontWeight: 'bold', fontFamily: 'Inter' }}
                     dx={-10}
-                    unit="%"
+                    unit={chartMode === 'inflation' ? '%' : ''}
                   />
                   <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#1A1A1A', strokeWidth: 2, strokeDasharray: '4 4' }} />
                   
                   <Area 
                     type="monotone" 
-                    dataKey="value" 
-                    stroke="#BF3131" 
+                    dataKey={chartConfig.key} 
+                    stroke={chartConfig.color} 
                     strokeWidth={4}
                     fillOpacity={1} 
                     fill="url(#colorValue)" 
@@ -142,7 +176,7 @@ export const InflationChart = ({
               </motion.div>
             ) : (
               <motion.div
-                key="bar-container"
+                key={`${chartMode}-bar`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -165,17 +199,14 @@ export const InflationChart = ({
                     tickLine={{ stroke: '#1A1A1A' }} 
                     tick={{ fill: '#1A1A1A', fontSize: 10, fontWeight: 'bold', fontFamily: 'Inter' }}
                     dx={-10}
-                    unit="%"
+                    unit={chartMode === 'inflation' ? '%' : ''}
                   />
                   <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1A1A1A', opacity: 0.05 }} />
                   <Bar 
-                    dataKey="value" 
+                    dataKey={chartConfig.key} 
                     animationDuration={1500}
-                  >
-                    {filteredData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.value > 10 ? '#BF3131' : entry.value > 2 ? '#EBC515' : '#006847'} />
-                    ))}
-                  </Bar>
+                    fill={chartConfig.color}
+                  />
                 </BarChart>
               </motion.div>
             )}
